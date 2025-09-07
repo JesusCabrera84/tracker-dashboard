@@ -139,3 +139,7 @@ section::before {
 .nav-bar .menu-card .controls .large-button {
   @apply w-full px-4 py-2 text-white rounded-lg shadow-sm transition-colors flex items-center gap-2;
 }
+
+.nav-bar .menu-card .controls .large-button .icon {
+  @apply w-6 h-6 text-white;
+}
