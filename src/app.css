@@ -131,3 +131,11 @@ section::before {
 .nav-bar .menu-card {
   @apply absolute left-16 top-0 w-80 max-w-[25vw] backdrop-blur-3xl backdrop-blur-lg rounded-xl shadow-xl border border-white/20 p-4 transition-all duration-8000 ease-out
 }  
+
+.nav-bar .menu-card .controls {
+  @apply space-y-3;
+}
+
+.nav-bar .menu-card .controls .large-button {
+  @apply w-full px-4 py-2 text-white rounded-lg shadow-sm transition-colors flex items-center gap-2;
+}
