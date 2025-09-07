@@ -3,6 +3,7 @@
 
 	import { goto } from '$app/navigation';
 	import { user, authToken } from '$lib/stores/auth.js';
+	import { apiService } from '$lib/services/api.js';
 	import * as GoogleMapsLoader from '@googlemaps/js-api-loader';
 	import { darkBlueCarStyle, DBLUE } from '$lib/mapStyles';
 
@@ -11,6 +12,9 @@
 	let isLoading = true;
 	let userData = null;
 	let showVehiclePanel = false;
+	let showVehicleList = false;
+	let vehicles = [];
+	let loadingVehicles = false;
 
 	// Configuración de Google Maps
 	const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyC_NFPQKCUYcCq4WLTTOmSLnfQmRmPYE-8';
@@ -110,6 +114,89 @@
 	function toggleVehiclePanel() {
 		showVehiclePanel = !showVehiclePanel;
 	}
+
+	async function toggleVehicleList() {
+		showVehicleList = !showVehicleList;
+		
+		// Si se está abriendo la lista y no hay vehículos cargados, cargarlos
+		if (showVehicleList && vehicles.length === 0) {
+			await loadVehicles();
+		}
+	}
+
+	async function loadVehicles() {
+		loadingVehicles = true;
+		try {
+			// Intentar cargar desde la API
+			const response = await apiService.getVehicles();
+			vehicles = response.vehicles || response || [];
+		} catch (error) {
+			console.warn('Error cargando vehículos desde API, usando datos de ejemplo:', error);
+			// Datos de ejemplo si la API no está disponible
+			vehicles = [
+				{
+					id: 'VH001',
+					name: 'Camión de Reparto #1',
+					driver: 'Juan Pérez',
+					status: 'active',
+					location: 'Zona Norte',
+					lastUpdate: '2025-01-07T01:00:00Z',
+					speed: 45,
+					fuel: 78
+				},
+				{
+					id: 'VH002',
+					name: 'Van de Servicios #2',
+					driver: 'María González',
+					status: 'inactive',
+					location: 'Centro',
+					lastUpdate: '2025-01-07T00:45:00Z',
+					speed: 0,
+					fuel: 92
+				},
+				{
+					id: 'VH003',
+					name: 'Pickup #3',
+					driver: 'Carlos Rodríguez',
+					status: 'active',
+					location: 'Zona Sur',
+					lastUpdate: '2025-01-07T01:05:00Z',
+					speed: 32,
+					fuel: 45
+				},
+				{
+					id: 'VH004',
+					name: 'Camión Pesado #4',
+					driver: 'Ana López',
+					status: 'maintenance',
+					location: 'Taller Central',
+					lastUpdate: '2025-01-06T18:30:00Z',
+					speed: 0,
+					fuel: 15
+				}
+			];
+		} finally {
+			loadingVehicles = false;
+		}
+	}
+
+	function getStatusColor(status) {
+		switch (status) {
+			case 'active': return 'text-green-500';
+			case 'inactive': return 'text-gray-500';
+			case 'maintenance': return 'text-yellow-500';
+			default: return 'text-gray-500';
+		}
+	}
+
+	function getStatusText(status) {
+		switch (status) {
+			case 'active': return 'Activo';
+			case 'inactive': return 'Inactivo';
+			case 'maintenance': return 'Mantenimiento';
+			default: return 'Desconocido';
+		}
+	}
 </script>
 
 <svelte:head>
@@ -119,22 +206,19 @@
 
 <div class="h-screen w-screen relative overflow-hidden bg-gray-900">
     
-    <!-- Usuario en la esquina superior derecha - Fijo y superpuesto -->
-    <div class="user-menu">
-        <!-- Icono de usuario -->
-        <div class="user-icon">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-            </svg>
-        </div>
-        <!-- Nombre del usuario -->
-        {#if userData}
-            <span class="user-name">{userData.name}</span>
-        {/if}
-    </div>
 
     <!-- Icono de vehículo en el lado izquierdo -->
     <div class="nav-bar">
+		<button 
+			class="nav-button"
+		
+		>
+		<!-- Icono de usuario -->
+		<svg class="menu-icon" fill="currentColor" viewBox="0 0 20 20">
+			<path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+		</svg>
+		</button>
+		<hr class="menu-separator"/>
         <!-- Botón del vehículo -->
         <button 
             on:click={toggleVehiclePanel}

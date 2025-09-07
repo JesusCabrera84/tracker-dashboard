@@ -92,6 +92,23 @@ class ApiService {
     async delete(endpoint) {
         return this.request(endpoint, { method: 'DELETE' });
     }
+
+    // Métodos específicos para vehículos
+    async getVehicles() {
+        return this.request('/vehicles', { method: 'GET' });
+    }
+
+    async getVehicle(vehicleId) {
+        return this.request(`/vehicles/${vehicleId}`, { method: 'GET' });
+    }
+
+    async getVehicleLocation(vehicleId) {
+        return this.request(`/vehicles/${vehicleId}/location`, { method: 'GET' });
+    }
+
+    async getVehicleStatus(vehicleId) {
+        return this.request(`/vehicles/${vehicleId}/status`, { method: 'GET' });
+    }
 }
 
 export const apiService = new ApiService();

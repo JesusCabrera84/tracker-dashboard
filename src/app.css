@@ -104,22 +104,13 @@ section::before {
   border-radius: 8px;
 }
 
-.user-menu {
-  @apply fixed top-2 right-16 z-50 flex items-center gap-3 backdrop-blur-lg rounded-full px-4 py-2 shadow-lg cursor-pointer;
-}
-
-.user-menu .user-icon {
-  @apply w-8 h-8  rounded-full flex items-center justify-center text-white text-sm font-semibold;
-}
-
-.user-menu .user-name {
-  @apply text-gray-100 font-medium text-sm;
-}
-
 .nav-bar {
-  @apply fixed left-4 top-1/5 -translate-y-1/2 z-40 pt-5 pb-5 backdrop-blur-3xl border-2 border-white/20  rounded-full;
+  @apply fixed left-4 top-1/5 -translate-y-1/2 z-40 pt-5 pb-5 backdrop-blur-3xl border-2 border-white/20 rounded-full shadow-lg shadow-sky-500/80 hover:shadow-xl;
 }
 
+.nav-bar .menu-separator {
+  @apply h-px text-amber-50 mt-2 mb-2 mx-2;
+}
 .nav-button {
   @apply w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-200 hover:scale-110;
 }
