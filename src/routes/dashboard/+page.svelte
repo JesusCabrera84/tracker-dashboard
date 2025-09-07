@@ -12,9 +12,11 @@
 	let isLoading = true;
 	let userData = null;
 	let showVehiclePanel = false;
+	let showUserPanel = false;
 	let showVehicleList = false;
 	let vehicles = [];
 	let loadingVehicles = false;
+	let selectedVehicles = [];
 
 	// Configuración de Google Maps
 	const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyC_NFPQKCUYcCq4WLTTOmSLnfQmRmPYE-8';
@@ -115,6 +117,10 @@
 		showVehiclePanel = !showVehiclePanel;
 	}
 
+	function toggleUserPanel() {
+		showUserPanel = !showUserPanel;
+	}
+
 	async function toggleVehicleList() {
 		showVehicleList = !showVehicleList;
 		
@@ -122,6 +128,53 @@
 		if (showVehicleList && vehicles.length === 0) {
 			await loadVehicles();
 		}
+	}
+
+	function toggleVehicleSelection(vehicleId) {
+		if (selectedVehicles.includes(vehicleId)) {
+			selectedVehicles = selectedVehicles.filter(id => id !== vehicleId);
+		} else {
+			selectedVehicles = [...selectedVehicles, vehicleId];
+		}
+	}
+
+	function selectAllVehicles() {
+		selectedVehicles = vehicles.map(v => v.id);
+	}
+
+	function clearVehicleSelection() {
+		selectedVehicles = [];
+	}
+
+	function getStatusColor(status) {
+		switch (status) {
+			case 'active':
+				return 'text-green-600';
+			case 'inactive':
+				return 'text-red-600';
+			case 'maintenance':
+				return 'text-yellow-600';
+			default:
+				return 'text-gray-600';
+		}
+	}
+
+	function getStatusText(status) {
+		switch (status) {
+			case 'active':
+				return 'Activo';
+			case 'inactive':
+				return 'Inactivo';
+			case 'maintenance':
+				return 'Mantenimiento';
+			default:
+				return 'Desconocido';
+		}
+	}
+
+	function handleLogout() {
+		user.logout();
+		goto('/login');
 	}
 
 	async function loadVehicles() {
@@ -207,17 +260,62 @@
 <div class="h-screen w-screen relative overflow-hidden bg-gray-900">
     
 
-    <!-- Icono de vehículo en el lado izquierdo -->
+    <!-- Navbar lateral -->
     <div class="nav-bar">
 		<button 
+			on:click={toggleUserPanel}
+			aria-label="Abrir panel de información de usuario"
 			class="nav-button"
-		
 		>
 		<!-- Icono de usuario -->
 		<svg class="menu-icon" fill="currentColor" viewBox="0 0 20 20">
 			<path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
 		</svg>
 		</button>
+
+		<!-- Panel de información de usuario -->
+		{#if showUserPanel}
+			<div class="menu-card">
+				<!-- Información del usuario -->
+				<div class="controls">
+					<div class="p-3 bg-gray-50/80 rounded-lg">
+						<p class="text-sm font-medium text-gray-800 mb-2">Información del Usuario</p>
+						{#if userData}
+							<div class="space-y-2">
+								<div class="flex items-center gap-2">
+									<svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+									</svg>
+									<span class="text-sm text-gray-700">{userData.name}</span>
+								</div>
+								<div class="flex items-center gap-2">
+									<svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M14.243 5.757a6 6 0 10-.986 9.284 1 1 0 111.087 1.678A8 8 0 1118 10a3 3 0 01-4.8 2.401A4 4 0 1114 10a1 1 0 102 0c0-1.537-.586-3.07-1.757-4.243zM12 10a2 2 0 10-4 0 2 2 0 004 0z" clip-rule="evenodd" />
+									</svg>
+									<span class="text-sm text-gray-700">{userData.email}</span>
+								</div>
+								<div class="flex items-center gap-2">
+									<svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h2zM8 5a1 1 0 011-1h2a1 1 0 011 1v1H8V5zM4 8a0 0 0 000 0v6a0 0 0 000 0h12a0 0 0 000 0V8a0 0 0 000 0H4z" clip-rule="evenodd" />
+									</svg>
+									<span class="text-sm text-gray-700">ID: {userData.id}</span>
+								</div>
+							</div>
+						{:else}
+							<p class="text-sm text-gray-500">No hay información de usuario disponible</p>
+						{/if}
+					</div>
+					
+					<button class="large-button bg-blue-600 hover:bg-blue-700" on:click={handleLogout}>
+						<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+							<path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+						</svg>
+						Cerrar Sesión
+					</button>
+				</div>
+			</div>
+		{/if}
+
 		<hr class="menu-separator"/>
         <!-- Botón del vehículo -->
         <button 
@@ -243,9 +341,8 @@
             <div class="menu-card">
                 <!-- Controles del panel -->
                 <div class="controls">
-                    <button class="large-button  bg-green-600 hover:bg-green-700">
-                        
-						<svg class="icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <button class="large-button bg-green-600 hover:bg-green-700" on:click={toggleVehicleList}>
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
 							<g id="SVGRepo_bgCarrier" stroke-width="0"></g>
 							<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
 							<g id="SVGRepo_iconCarrier"> 
@@ -254,8 +351,67 @@
 								</g>
 							</g>
 						</svg>
-                        Ver Todos los Vehículos
+                        {showVehicleList ? 'Ocultar' : 'Ver'} Lista de Vehículos
                     </button>
+                    
+                    <!-- Lista de vehículos -->
+                    {#if showVehicleList}
+                        <div class="mt-3 p-3 bg-gray-50/80 rounded-lg max-h-64 overflow-y-auto">
+                            <div class="flex justify-between items-center mb-3">
+                                <p class="text-sm font-medium text-gray-800">Seleccionar Vehículos</p>
+                                <div class="flex gap-2">
+                                    <button class="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600" on:click={selectAllVehicles}>
+                                        Todos
+                                    </button>
+                                    <button class="text-xs px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600" on:click={clearVehicleSelection}>
+                                        Limpiar
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {#if loadingVehicles}
+                                <div class="flex items-center justify-center py-4">
+                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                                    <span class="ml-2 text-sm text-gray-600">Cargando vehículos...</span>
+                                </div>
+                            {:else if vehicles.length > 0}
+                                <div class="space-y-2">
+                                    {#each vehicles as vehicle}
+                                        <label class="flex items-center gap-3 p-2 rounded hover:bg-gray-100/50 cursor-pointer">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={selectedVehicles.includes(vehicle.id)}
+                                                on:change={() => toggleVehicleSelection(vehicle.id)}
+                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center justify-between">
+                                                    <p class="text-sm font-medium text-gray-900 truncate">{vehicle.name}</p>
+                                                    <span class="text-xs px-2 py-1 rounded-full {getStatusColor(vehicle.status)} bg-opacity-20">
+                                                        {getStatusText(vehicle.status)}
+                                                    </span>
+                                                </div>
+                                                <p class="text-xs text-gray-500">{vehicle.driver} • {vehicle.location}</p>
+                                            </div>
+                                        </label>
+                                    {/each}
+                                </div>
+                                
+                                {#if selectedVehicles.length > 0}
+                                    <div class="mt-3 pt-3 border-t border-gray-200">
+                                        <p class="text-xs text-gray-600 mb-2">
+                                            {selectedVehicles.length} vehículo{selectedVehicles.length !== 1 ? 's' : ''} seleccionado{selectedVehicles.length !== 1 ? 's' : ''}
+                                        </p>
+                                        <button class="w-full text-xs px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                                            Rastrear Seleccionados
+                                        </button>
+                                    </div>
+                                {/if}
+                            {:else}
+                                <p class="text-sm text-gray-500 text-center py-4">No hay vehículos disponibles</p>
+                            {/if}
+                        </div>
+                    {/if}
                     
                     <button class="large-button bg-blue-600 hover:bg-blue-700">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -271,7 +427,7 @@
                         Filtros
                     </button>
                     
-                    <button class="large-button  bg-red-600 hover:bg-red-700 ">
+                    <button class="large-button bg-red-600 hover:bg-red-700">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd" />
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v4a1 1 0 11-2 0V7zM12 7a1 1 0 10-2 0v4a1 1 0 102 0V7z" clip-rule="evenodd" />
@@ -285,8 +441,14 @@
                     <p class="text-xs text-gray-600 font-medium mb-1">Estado del Sistema</p>
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <span class="text-xs text-gray-700">Conectado - 3 vehículos activos</span>
+                        <span class="text-xs text-gray-700">Conectado - {vehicles.filter(v => v.status === 'active').length} vehículos activos</span>
                     </div>
+                    {#if selectedVehicles.length > 0}
+                        <div class="flex items-center gap-2 mt-1">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <span class="text-xs text-gray-700">{selectedVehicles.length} seleccionado{selectedVehicles.length !== 1 ? 's' : ''}</span>
+                        </div>
+                    {/if}
                 </div>
             </div>
         {/if}
