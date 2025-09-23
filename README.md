@@ -83,20 +83,22 @@ src/
 La aplicación está configurada para trabajar con una API FastAPI. Los endpoints esperados son:
 
 ### Autenticación
+
 - `POST /auth/login` - Iniciar sesión
 - `POST /auth/register` - Registrar usuario
 - `POST /auth/logout` - Cerrar sesión
 - `GET /auth/verify` - Verificar token
 
 ### Ejemplo de respuesta de login:
+
 ```json
 {
-  "access_token": "jwt_token_here",
-  "user": {
-    "id": 1,
-    "name": "Usuario",
-    "email": "usuario@email.com"
-  }
+	"access_token": "jwt_token_here",
+	"user": {
+		"id": 1,
+		"name": "Usuario",
+		"email": "usuario@email.com"
+	}
 }
 ```
 
@@ -113,17 +115,19 @@ La aplicación está configurada para trabajar con una API FastAPI. Los endpoint
 ## Personalización
 
 ### Cambiar ubicación por defecto del mapa
+
 Edita `src/routes/dashboard/+page.svelte`:
 
 ```javascript
 const mapOptions = {
-    center: { lat: TU_LATITUD, lng: TU_LONGITUD },
-    zoom: 13,
-    // ...
+	center: { lat: TU_LATITUD, lng: TU_LONGITUD },
+	zoom: 13
+	// ...
 };
 ```
 
 ### Agregar nuevos endpoints de API
+
 Edita `src/lib/services/api.js` y agrega nuevos métodos según necesites.
 
 ## Construcción
@@ -145,5 +149,6 @@ npm run preview
 La aplicación puede desplegarse en cualquier plataforma que soporte aplicaciones SvelteKit como Vercel, Netlify, o un servidor tradicional.
 
 Para desplegar, asegúrate de:
+
 1. Configurar las variables de entorno en tu plataforma
 2. Instalar un [adapter](https://svelte.dev/docs/kit/adapters) apropiado si es necesario

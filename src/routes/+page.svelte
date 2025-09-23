@@ -5,7 +5,7 @@
 
 	onMount(() => {
 		user.init();
-		
+
 		const unsubscribe = user.subscribe((userData) => {
 			if (userData) {
 				goto('/dashboard');
