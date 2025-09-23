@@ -4,6 +4,9 @@
 	import { user } from '$lib/stores/auth.js';
 	import '$lib//styles/dashboard.css';
 
+	// Permitir saltar autenticación si VITE_BYPASS_AUTH=true
+	const BYPASS = typeof import.meta !== 'undefined' && import.meta.env?.VITE_BYPASS_AUTH === 'true';
+
 	let { children } = $props();
 	let isAuthenticated = $state(false);
 	let isLoading = $state(true);
@@ -15,7 +18,7 @@
 			isAuthenticated = !!userData;
 			isLoading = false;
 
-			if (!userData) {
+			if (!userData && !BYPASS) {
 				goto('/login');
 			}
 		});

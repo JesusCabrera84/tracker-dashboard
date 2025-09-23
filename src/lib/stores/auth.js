@@ -2,6 +2,9 @@ import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import { dev } from '$app/environment';
 
+// Flag de bypass: permite saltar autenticación en entornos de demo/maqueta
+const BYPASS = typeof import.meta !== 'undefined' && import.meta.env?.VITE_BYPASS_AUTH === 'true';
+
 // Mock user para desarrollo
 const mockUser = {
 	id: 1,
@@ -30,15 +33,15 @@ function createAuthStore() {
 		},
 		init: () => {
 			if (browser) {
-				// En modo desarrollo, usar mock user automáticamente
-				if (dev) {
-					console.log('🔧 Modo desarrollo: Usuario mock autenticado automáticamente');
+				// En modo desarrollo o con BYPASS, autenticar mock
+				if (dev || BYPASS) {
+					console.log('🔧 Bypass de autenticación activo: usuario mock autenticado');
 					set(mockUser);
 					localStorage.setItem('user', JSON.stringify(mockUser));
 					return;
 				}
 
-				// En producción, verificar localStorage
+				// En ejecución normal, verificar localStorage
 				const userData = localStorage.getItem('user');
 				if (userData) {
 					set(JSON.parse(userData));
@@ -64,8 +67,8 @@ function createTokenStore() {
 		},
 		getToken: () => {
 			if (browser) {
-				// En modo desarrollo, devolver token mock
-				if (dev) {
+				// En modo desarrollo o BYPASS, devolver token mock
+				if (dev || BYPASS) {
 					return 'mock-dev-token';
 				}
 				return localStorage.getItem('token');
@@ -79,8 +82,8 @@ function createTokenStore() {
 			}
 		},
 		init: () => {
-			if (browser && dev) {
-				// En desarrollo, establecer token mock
+			if (browser && (dev || BYPASS)) {
+				// En desarrollo o con BYPASS, establecer token mock
 				set('mock-dev-token');
 				localStorage.setItem('token', 'mock-dev-token');
 			}

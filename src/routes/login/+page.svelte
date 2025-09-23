@@ -4,12 +4,15 @@
 	import { apiService } from '$lib/services/api.js';
 	import { onMount } from 'svelte';
 
+	// Bypass para demo: si VITE_BYPASS_AUTH=true permite entrar con cualquier dato
+	const BYPASS = typeof import.meta !== 'undefined' && import.meta.env?.VITE_BYPASS_AUTH === 'true';
+
 	let email = '';
 	let password = '';
 	let loading = false;
 	let error = '';
 
-	// Redirigir si ya está autenticado
+	// Redirigir si ya está autenticado (o si BYPASS activa mock desde user.init)
 	onMount(() => {
 		user.init();
 		const unsubscribe = user.subscribe((userData) => {
@@ -30,6 +33,14 @@
 		error = '';
 
 		try {
+			// Si BYPASS está activo, autenticamos mock sin llamar a la API
+			if (BYPASS) {
+				const demoUser = { id: 1, name: 'Usuario Demo', email };
+				authToken.setToken('mock-demo-token');
+				user.login(demoUser);
+				goto('/dashboard');
+				return;
+			}
 			const response = await apiService.login({ email, password });
 
 			// Guardar token y datos del usuario

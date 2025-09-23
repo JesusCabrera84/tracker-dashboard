@@ -1,0 +1,159 @@
+name: Build and Deploy Tracker Monitor Web to EC2
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master, develop]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+      # TODO test y agregarlos a la carpeta test
+      #  - name: Run tests
+      #    run: npm run test
+
+      - name: Build application
+        run: npm run build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: tracker-monitor-web:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VITE_BYPASS_AUTH=true
+
+  deploy-to-ec2-test:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    environment: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.EC2_SSH_KEY }}
+          name: id_rsa
+          known_hosts: unnecessary
+          if_key_exists: replace
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image for deployment
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: tracker-monitor-web:latest
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VITE_BYPASS_AUTH=true
+
+      - name: Save Docker image
+        run: docker save tracker-monitor-web:latest | gzip > tracker-monitor-web.tar.gz
+
+      - name: Copy Docker image to EC2
+        run: |
+          echo "Copiando imagen Docker al servidor..."
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa tracker-monitor-web.tar.gz ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_TEST }}:/tmp/
+          echo "Copia completada."
+
+      - name: Verify file transfer
+        run: |
+          echo "Verificando que el archivo se copió correctamente..."
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_TEST }} << 'EOF'
+              if [ -f /tmp/tracker-monitor-web.tar.gz ]; then
+              echo "✅ Archivo encontrado: /tmp/tracker-monitor-web.tar.gz"
+              echo "Tamaño del archivo: $(du -h /tmp/tracker-monitor-web.tar.gz)"
+              echo "Espacio disponible en /tmp: $(df -h /tmp | tail -1)"
+              else
+              echo "❌ Error: No se encontró el archivo /tmp/tracker-monitor-web.tar.gz"
+              exit 1
+              fi
+          EOF
+
+      - name: Deploy to EC2 Test Server
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_TEST }} << 'EOF'
+          set -e
+
+          echo "=== Detener contenedor anterior ==="
+          # Detener y remover el contenedor anterior si existe
+          docker stop tracker-monitor-web-test || true
+          docker rm tracker-monitor-web-test || true
+
+          echo "=== Limpiando espacio en disco ==="
+          # Limpiar contenedores e imágenes Docker no utilizadas (pero no archivos temporales aún)
+          docker container prune -f || true
+          docker image prune -f || true
+          docker volume prune -f || true
+
+          # Mostrar espacio disponible
+          echo "Espacio disponible en /tmp:"
+          df -h /tmp
+
+          echo "=== Cargar nueva imagen ==="
+          # Cargar la nueva imagen
+          cd /tmp
+          if [ -f tracker-monitor-web.tar.gz ]; then
+              echo "Cargando imagen Docker..."
+              docker load < tracker-monitor-web.tar.gz
+
+              echo "=== Verificar imagen cargada ==="
+              docker images | grep tracker-monitor-web || echo "Advertencia: No se encontró la imagen tracker-monitor-web"
+              
+              echo "=== Ejecutar nuevo contenedor ==="
+              # Ejecutar el nuevo contenedor
+              docker run -d \
+                  --name tracker-monitor-web-test \
+                  --restart unless-stopped \
+                  -p 3340:3340 \
+                  -e NODE_ENV=production \
+                  tracker-monitor-web:latest
+              
+              echo "=== Verificar contenedor ==="
+              docker ps | grep tracker-monitor-web-test
+              
+              echo "=== Limpiar archivos temporales ==="
+              rm -f tracker-monitor-web.tar.gz
+              
+              # Limpiar archivos temporales antiguos de deployments anteriores
+              find /tmp -name "tracker-monitor-web*.tar.gz" -mtime +1 -delete || true
+              
+              echo "=== Deployment completado exitosamente ==="
+          else
+              echo "Error: No se encontró el archivo tracker-monitor-web.tar.gz"
+              exit 1
+          fi
+          EOF

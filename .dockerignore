@@ -1,0 +1,18 @@
+# Reduce Docker build context
+node_modules
+.git
+.svelte-kit
+.github
+tests
+
+# Env files
+.env
+.env.*
+
+# Logs
+npm-debug.log
+*.log
+
+# Misc
+.DS_Store
+.vscode
