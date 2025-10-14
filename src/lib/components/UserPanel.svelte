@@ -1,6 +1,7 @@
 <script>
 	import { goto } from '$app/navigation';
 	import { user, authToken } from '$lib/stores/auth.js';
+	import { theme } from '$lib/stores/theme.js';
 
 	export let showUserPanel = false;
 	export let userData = null;
@@ -9,6 +10,17 @@
 		user.logout();
 		authToken.clearToken();
 		goto('/login');
+	}
+
+	function setModern() {
+		theme.set('modern');
+	}
+	function setClassic() {
+		theme.set('classic');
+	}
+
+	function setDark() {
+		theme.set('dark');
 	}
 </script>
 
@@ -32,8 +44,8 @@
 	<div class="menu-card">
 		<!-- Información del usuario -->
 		<div class="controls">
-			<div class="p-3 bg-gray-50/80 rounded-lg">
-				<p class="text-sm font-medium text-gray-800 mb-2">Información del Usuario</p>
+			<div class="p-3 rounded-lg panel">
+				<p class="text-sm font-medium mb-2 text-app">Información del Usuario</p>
 				{#if userData}
 					<div class="space-y-2">
 						<div class="flex items-center gap-2">
@@ -44,8 +56,24 @@
 									clip-rule="evenodd"
 								/>
 							</svg>
-							<span class="text-sm text-gray-700">{userData.name}</span>
+							<span class="text-sm text-app">{userData.name}</span>
 						</div>
+
+			<!-- Cambiar tema -->
+			<div class="p-3 rounded-lg panel">
+				<p class="text-sm font-medium mb-2 text-app">Tema</p>
+				<div class="flex gap-2">
+					<button class="btn-primary px-3 py-1 w-auto" on:click={setModern}>
+						Moderno
+					</button>
+					<button class="btn-secondary" on:click={setClassic}>
+						Clásico
+					</button>
+					<button class="btn-secondary" on:click={setDark}>
+						Dark
+					</button>
+				</div>
+			</div>
 						<div class="flex items-center gap-2">
 							<svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
 								<path
@@ -54,7 +82,7 @@
 									clip-rule="evenodd"
 								/>
 							</svg>
-							<span class="text-sm text-gray-700">{userData.email}</span>
+							<span class="text-sm text-app">{userData.email}</span>
 						</div>
 						<div class="flex items-center gap-2">
 							<svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
@@ -64,7 +92,7 @@
 									clip-rule="evenodd"
 								/>
 							</svg>
-							<span class="text-sm text-gray-700">ID: {userData.id}</span>
+							<span class="text-sm text-app">ID: {userData.id}</span>
 						</div>
 					</div>
 				{:else}
@@ -72,7 +100,7 @@
 				{/if}
 			</div>
 
-			<button class="large-button bg-blue-600 hover:bg-blue-700" on:click={handleLogout}>
+			<button class="large-button" on:click={handleLogout}>
 				<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
 					<path
 						fill-rule="evenodd"

@@ -15,6 +15,20 @@ export function getStatusColor(status) {
 	}
 }
 
+// Theme-aware badge classes based on CSS variables defined in app.css
+export function getStatusBadgeClass(status) {
+  switch (status) {
+    case 'active':
+      return 'badge badge-active';
+    case 'inactive':
+      return 'badge badge-inactive';
+    case 'maintenance':
+      return 'badge badge-maintenance';
+    default:
+      return 'badge';
+  }
+}
+
 export function getStatusText(status) {
 	switch (status) {
 		case 'active':

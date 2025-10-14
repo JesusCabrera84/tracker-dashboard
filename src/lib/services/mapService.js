@@ -1,11 +1,15 @@
 import * as GoogleMapsLoader from '@googlemaps/js-api-loader';
-import { darkBlueCarStyle, DBLUE } from '$lib/mapStyles';
+import { darkBlueCarStyle, DBLUE, darkGrayMapStyle, DGREY } from '$lib/mapStyles';
+import { getStatusBadgeClass } from '$lib/utils/vehicleUtils.js';
+import { theme } from '$lib/stores/theme.js';
 
 class MapService {
 	constructor() {
 		this.map = null;
 		this.google = null;
 		this.markers = new Map();
+		this.unsubscribeTheme = null;
+		this.currentTheme = undefined;
 		this.apiKey =
 			import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyC_NFPQKCUYcCq4WLTTOmSLnfQmRmPYE-8';
 	}
@@ -15,10 +19,18 @@ class MapService {
 			const loader = new GoogleMapsLoader.Loader({
 				apiKey: this.apiKey,
 				version: 'weekly',
-				libraries: ['places']
 			});
 
 			this.google = await loader.load();
+
+			// Determine initial theme (SSR-safe fallback)
+			const initialTheme =
+				typeof document !== 'undefined'
+					? document.documentElement?.dataset?.theme || 'modern'
+					: 'modern';
+
+			const useModern = initialTheme === 'modern';
+			const useDark = initialTheme === 'dark';
 
 			const mapOptions = {
 				center: { lat: 19.4326, lng: -99.1332 }, // Ciudad de México por defecto
@@ -28,12 +40,27 @@ class MapService {
 				streetViewControl: false,
 				mapTypeControl: false,
 				zoomControl: true,
-				styles: darkBlueCarStyle,
-				backgroundColor: DBLUE.bg,
+				styles: useModern ? darkBlueCarStyle : useDark ? darkGrayMapStyle : null,
+				backgroundColor: useModern ? DBLUE.bg : useDark ? DGREY.bg : '#ffffff',
 				disableDefaultUI: true
 			};
 
 			this.map = new this.google.maps.Map(mapElement, mapOptions);
+
+			// React to theme changes at runtime
+			if (!this.unsubscribeTheme) {
+				this.unsubscribeTheme = theme.subscribe((t) => {
+					this.currentTheme = t;
+					if (this.map) {
+						const isModern = t === 'modern';
+						const isDark = t === 'dark';
+						this.map.setOptions({
+							styles: isModern ? darkBlueCarStyle : isDark ? darkGrayMapStyle : null,
+							backgroundColor: isModern ? DBLUE.bg : isDark ? DGREY.bg : '#ffffff'
+						});
+					}
+				});
+			}
 
 			// Intentar obtener la ubicación actual del usuario
 			await this.setUserLocation();
@@ -157,22 +184,22 @@ class MapService {
 		const lastUpdate = vehicle.gps_datetime || 'No disponible';
 
 		return `
-			<div class="p-3 min-w-48">
-				<h3 class="font-semibold text-gray-900 mb-2">${vehicle.device_id}</h3>
-				<div class="space-y-1 text-sm">
-					<p><span class="font-medium">Estado:</span> 
-						<span class="px-2 py-1 rounded text-xs ${this.getStatusClasses(vehicle.status)}">
+			<div class="p-3 min-w-48 text-app">
+				<h3 class="font-semibold text-app mb-2">${vehicle.device_id}</h3>
+				<div class="space-y-1 text-sm text-app">
+					<p><span class="font-medium text-app">Estado:</span> 
+						<span class="px-2 py-1 text-xs ${getStatusBadgeClass(vehicle.status)}">
 							${this.getStatusText(vehicle.status)}
 						</span>
 					</p>
-					<p><span class="font-medium">Velocidad:</span> ${speed} km/h</p>
-					<p><span class="font-medium">Batería:</span> ${battery} V</p>
-					<p><span class="font-medium">Bater&iacute;a dispositivo:</span> ${batteryDevice || 0} V</p>
-					${vehicle.device_id ? `<p><span class="font-medium">Device ID:</span> ${vehicle.device_id}</p>` : ''}
-					<p><span class="font-medium">Última actualización:</span> ${lastUpdate}</p>
+					<p><span class="font-medium text-app">Velocidad:</span> ${speed} km/h</p>
+					<p><span class="font-medium text-app">Batería:</span> ${battery} V</p>
+					<p><span class="font-medium text-app">Bater&iacute;a dispositivo:</span> ${batteryDevice || 0} V</p>
+					${vehicle.device_id ? `<p><span class=\"font-medium text-app\">Device ID:</span> ${vehicle.device_id}</p>` : ''}
+					<p><span class="font-medium text-app">Última actualización:</span> ${lastUpdate}</p>
 					${
 						vehicle.latitude && vehicle.longitude
-							? `<p><span class="font-medium">Coordenadas:</span> ${vehicle.latitude}, ${vehicle.longitude}</p>`
+							? `<p><span class=\"font-medium text-app\">Coordenadas:</span> ${vehicle.latitude}, ${vehicle.longitude}</p>`
 							: ''
 					}
 				</div>

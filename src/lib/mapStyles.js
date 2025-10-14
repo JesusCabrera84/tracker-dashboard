@@ -40,6 +40,51 @@ export const grayBlueMapStyle = [
 	}
 ];
 
+// Paleta gris oscura para tema 'dark' (sin azules)
+export const DGREY = {
+  bg: '#0f1115',
+  land: '#111318',
+  road: '#1b1f26',
+  roadStroke: '#0b0d11',
+  arterial: '#232833',
+  highway: '#2c3340',
+  water: '#0f1217',
+  park: '#151922',
+  poi: '#141820',
+  text: '#c5cbd5',
+  textStroke: '#0f1115',
+  admin: '#1a1f29'
+};
+
+// Estilo oscuro en escala de grises
+export const darkGrayMapStyle = [
+  { elementType: 'geometry', stylers: [{ color: DGREY.land }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: DGREY.text }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: DGREY.textStroke }] },
+
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: DGREY.water }] },
+  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: DGREY.text }] },
+
+  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: DGREY.park }] },
+  { featureType: 'poi', elementType: 'geometry', stylers: [{ color: DGREY.poi }] },
+  { featureType: 'poi', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: DGREY.text }] },
+
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: DGREY.road }] },
+  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: DGREY.roadStroke }] },
+  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: DGREY.text }] },
+
+  { featureType: 'road.arterial', elementType: 'geometry', stylers: [{ color: DGREY.arterial }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: DGREY.highway }] },
+  { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{ color: DGREY.road }] },
+
+  { featureType: 'administrative', elementType: 'geometry', stylers: [{ color: DGREY.admin }] },
+  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: DGREY.text }] },
+
+  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+  { featureType: 'landscape.natural', elementType: 'geometry', stylers: [{ color: DGREY.land }] }
+];
+
 // src/lib/mapStyles.js
 export const DBLUE = {
 	bg: '#0b1524', // fondo global

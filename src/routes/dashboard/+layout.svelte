@@ -27,13 +27,12 @@
 	});
 </script>
 
+
 {#if isLoading}
-	<div class="min-h-screen flex items-center justify-center bg-gray-100">
+	<div class="min-h-screen flex items-center justify-center bg-app">
 		<div class="text-center">
-			<div
-				class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"
-			></div>
-			<p class="text-gray-600">Verificando autenticación...</p>
+			<div class="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style="border-color: var(--accent-cyan)"></div>
+			<p class="text-app">Verificando autenticación...</p>
 		</div>
 	</div>
 {:else if isAuthenticated}

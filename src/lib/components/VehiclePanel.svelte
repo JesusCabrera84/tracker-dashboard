@@ -8,7 +8,7 @@
 		selectedVehicleCount,
 		vehicleActions
 	} from '$lib/stores/vehicleStore.js';
-	import { getStatusColor, getStatusText } from '$lib/utils/vehicleUtils.js';
+	import { getStatusColor, getStatusText, getStatusBadgeClass } from '$lib/utils/vehicleUtils.js';
 	import { mapService } from '$lib/services/mapService.js';
 	import { apiService } from '$lib/services/api.js';
 	import { positionService } from '$lib/services/positionService.js';
@@ -139,7 +139,7 @@
 	<div class="menu-card">
 		<!-- Controles del panel -->
 		<div class="controls">
-			<button class="large-button bg-green-600 hover:bg-green-700" on:click={toggleVehicleList}>
+			<button class="large-button" on:click={toggleVehicleList}>
 				<svg
 					class="icon"
 					viewBox="0 0 24 24"
@@ -166,20 +166,14 @@
 
 			<!-- Lista de vehículos -->
 			{#if showVehicleList}
-				<div class="mt-3 p-3 bg-gray-50/80 rounded-lg max-h-64 overflow-y-auto">
+				<div class="mt-3 p-3 rounded-lg panel max-h-64 overflow-y-auto">
 					<div class="flex justify-between items-center mb-3">
-						<p class="text-sm font-medium text-gray-800">Seleccionar Vehículos</p>
+						<p class="text-sm font-medium text-app">Seleccionar Vehículos</p>
 						<div class="flex gap-2">
-							<button
-								class="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-								on:click={selectAllVehicles}
-							>
+							<button class="btn-primary text-xs px-2 py-1 w-auto" on:click={selectAllVehicles}>
 								Todos
 							</button>
-							<button
-								class="text-xs px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
-								on:click={clearVehicleSelection}
-							>
+							<button class="btn-secondary text-xs" on:click={clearVehicleSelection}>
 								Limpiar
 							</button>
 						</div>
@@ -187,39 +181,34 @@
 
 					{#if $loadingVehicles || $loadingPositions}
 						<div class="flex items-center justify-center py-4">
-							<div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-							<span class="ml-2 text-sm text-gray-600">
+							<div class="animate-spin rounded-full h-6 w-6 border-b-2" style="border-color: var(--accent-cyan)"></div>
+							<span class="ml-2 text-sm text-app">
 								{$loadingVehicles ? 'Cargando vehículos...' : 'Actualizando posiciones...'}
 							</span>
 						</div>
 					{:else if $vehicles.length > 0}
 						<div class="space-y-2">
 							{#each $vehicles as vehicle}
-								<div class="flex items-center gap-3 p-2 rounded hover:bg-gray-100/50">
+								<div class="flex items-center gap-3 p-2 rounded">
 									<input
 										type="checkbox"
 										checked={$selectedVehicles.includes(vehicle.id)}
 										on:change={() => toggleVehicleSelection(vehicle.id)}
-										class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+										class="rounded"
+										style="accent-color: var(--accent-cyan)"
 									/>
 									<div class="flex-1 min-w-0">
 										<div class="flex items-center justify-between">
-											<button
-												class="text-sm font-medium text-gray-900 truncate hover:text-blue-600 text-left"
-												on:click={() => centerOnVehicle(vehicle)}
-												title="Centrar en el mapa"
-											>
+											<button class="text-sm font-medium truncate text-app text-left" on:click={() => centerOnVehicle(vehicle)} title="Centrar en el mapa">
 												{vehicle.name}
 											</button>
 											<span
-												class="text-xs px-2 py-1 rounded-full {getStatusColor(
-													vehicle.status
-												)} bg-opacity-20"
+												class="text-xs px-2 py-1 {getStatusBadgeClass(vehicle.status)}"
 											>
 												{getStatusText(vehicle.status)}
 											</span>
 										</div>
-										<div class="text-xs text-gray-500">
+										<div class="text-xs text-app">
 											<p>ID: {vehicle.deviceId}</p>
 										</div>
 									</div>
@@ -228,28 +217,25 @@
 						</div>
 
 						{#if $selectedVehicleCount > 0}
-							<div class="mt-3 pt-3 border-t border-gray-200">
-								<p class="text-xs text-gray-600 mb-2">
+							<div class="mt-3 pt-3 border-t" style="border-color: var(--panel-border)">
+								<p class="text-xs text-app mb-2">
 									{$selectedVehicleCount} vehículo{$selectedVehicleCount !== 1 ? 's' : ''} seleccionado{$selectedVehicleCount !==
 									1
 										? 's'
 										: ''}
 								</p>
-								<button
-									class="w-full text-xs px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-									on:click={trackSelectedVehicles}
-								>
+								<button class="btn-primary w-full text-xs px-3 py-2" on:click={trackSelectedVehicles}>
 									Rastrear Seleccionados
 								</button>
 							</div>
 						{/if}
 					{:else}
-						<p class="text-sm text-gray-500 text-center py-4">No hay vehículos disponibles</p>
+						<p class="text-sm text-app text-center py-4">No hay vehículos disponibles</p>
 					{/if}
 				</div>
 			{/if}
 
-			<button class="large-button bg-blue-600 hover:bg-blue-700" on:click={refreshPositions}>
+			<button class="large-button" on:click={refreshPositions}>
 				<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
 					<path
 						fill-rule="evenodd"
@@ -260,7 +246,7 @@
 				Actualizar Posiciones
 			</button>
 
-			<button class="large-button bg-yellow-500 hover:bg-yellow-600">
+			<button class="large-button">
 				<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
 					<path
 						fill-rule="evenodd"
@@ -271,7 +257,7 @@
 				Filtros
 			</button>
 
-			<button class="large-button bg-red-600 hover:bg-red-700">
+			<button class="large-button">
 				<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
 					<path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd" />
 					<path
@@ -285,18 +271,18 @@
 		</div>
 
 		<!-- Información adicional -->
-		<div class="mt-4 p-3 bg-gray-50/80 rounded-lg">
-			<p class="text-xs text-gray-600 font-medium mb-1">Estado del Sistema</p>
+		<div class="mt-4 p-3 rounded-lg panel">
+			<p class="text-xs text-app font-medium mb-1">Estado del Sistema</p>
 			<div class="flex items-center gap-2">
-				<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-				<span class="text-xs text-gray-700"
+				<div class="w-2 h-2 rounded-full animate-pulse" style="background: var(--accent-cyan)"></div>
+				<span class="text-xs text-app"
 					>Conectado - {$activeVehicles.length} vehículos activos</span
 				>
 			</div>
 			{#if $selectedVehicleCount > 0}
 				<div class="flex items-center gap-2 mt-1">
-					<div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-					<span class="text-xs text-gray-700"
+					<div class="w-2 h-2 rounded-full" style="background: var(--accent-cyan)"></div>
+					<span class="text-xs text-app"
 						>{$selectedVehicleCount} seleccionado{$selectedVehicleCount !== 1 ? 's' : ''}</span
 					>
 				</div>
