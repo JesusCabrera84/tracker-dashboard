@@ -5,8 +5,8 @@
 [data-theme="modern"] {
     --accent-cyan: #00a6c0;
     --light-cream: #fdfdf9;
-    --glass-bg: rgba(255, 255, 255, 0.08);
-    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-bg: rgba(255, 255, 255, 0.12);
+    --glass-border: rgba(255, 255, 255, 0.25);
     /* Nuevas variables */
     --app-bg: #0b1524; /* fondo oscuro acorde al mapa */
     --app-text: #e5e7eb; /* gris claro */
@@ -36,8 +36,8 @@
 [data-theme="dark"] {
     --accent-cyan: #22d3ee; /* cyan-400 para acentos en oscuro */
     --light-cream: #e5e7eb; /* texto claro */
-    --glass-bg: rgba(255, 255, 255, 0.06);
-    --glass-border: rgba(255, 255, 255, 0.16);
+    --glass-bg: rgba(77, 77, 77, 0.2);
+    --glass-border: rgba(255, 255, 255, 0.18);
     /* Base */
     --app-bg: #0f1115; /* gris/neutro muy oscuro */
     --app-text: #e5e7eb; /* gris claro */
@@ -68,8 +68,8 @@
 [data-theme="classic"] {
     --accent-cyan: #2563eb; /* azul estándar */
     --light-cream: #f9fafb; /* gris muy claro */
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(0, 0, 0, 0.1);
+    --glass-bg: rgba(216, 218, 221, 0.2);
+    --glass-border: rgba(0, 0, 0, 0.08);
     /* Nuevas variables */
     --app-bg: #ffffff;
     --app-text: #111827; /* gray-900 */
@@ -211,7 +211,8 @@ section::before {
 }
 
 .nav-bar {
-	@apply fixed left-4 top-1/5 -translate-y-1/2 z-40 pt-5 pb-5 backdrop-blur-3xl border-2 border-white/20 rounded-full shadow-lg shadow-sky-500/80 hover:shadow-xl;
+	@apply fixed left-4 top-1/5 -translate-y-1/2 z-40 pt-5 pb-5 border-2 border-white/20 rounded-full shadow-lg shadow-sky-500/80 hover:shadow-xl;
+	isolation: isolate; /* ensure backdrop-filter descendants composite over page */
 }
 
 .nav-bar .menu-separator {
@@ -226,7 +227,12 @@ section::before {
 }
 
 .nav-bar .menu-card {
-	@apply absolute left-16 top-0 w-80 max-w-[25vw] backdrop-blur-lg rounded-xl shadow-xl border border-white/20 p-4 transition-all duration-8000 ease-out;
+	@apply absolute left-16 top-0 w-80 max-w-[25vw] rounded-xl shadow-xl border border-white/20 p-4 transition-all duration-8000 ease-out;
+	background: var(--glass-bg);
+	backdrop-filter: blur(5px);
+	overflow: hidden; /* clip backdrop at rounded corners */
+	will-change: backdrop-filter; /* hint GPU */
+	background-clip: padding-box; /* keep border crisp while background is translucent */
 }
 
 .nav-bar .menu-card .controls {
