@@ -64,17 +64,32 @@
 </script>
 
 <svelte:head>
-	<title>Login - Tracker Monitor</title>
+    <title>Login - Tracker Monitor</title>
 </svelte:head>
 
+<!-- Background video -->
+<video
+    class="fixed inset-0 w-full h-full object-cover pointer-events-none"
+    src="/vid/map-back-1.mp4"
+    autoplay
+    muted
+    loop
+    playsinline
+    aria-hidden="true"
+></video>
+
+<!-- Gradient overlay for readability -->
+<div class="fixed inset-0 bg-gradient-to-br from-blue-900/70 to-indigo-900/70 pointer-events-none"></div>
+
+<!-- Page content -->
 <div
-	class="min-h-screen bg-gradient-to-br from-blue-900 to-indigo-900 flex items-center justify-center px-4"
+    class="relative z-10 min-h-screen flex items-center justify-center px-4"
 >
-	<div class="max-w-md w-full space-y-8">
-		<div class="text-center">
-			<h2 class="section-title">Iniciar Sesión</h2>
-			<p class="mt-2 text-sm text-blue-200">Accede a tu cuenta de Tracker Monitor</p>
-		</div>
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+            <h2 class="section-title">Iniciar Sesión</h2>
+            <p class="mt-2 text-sm text-blue-200">Accede a tu cuenta de Tracker Monitor</p>
+        </div>
 
 		<div class="card">
 			<form on:submit|preventDefault={handleLogin} class="space-y-6">
