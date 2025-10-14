@@ -84,16 +84,16 @@
 
 				<div>
 					<label for="email" class="block text-sm font-medium text-gray-300"
-						>Correo Electrónico</label
+						>Correo electrónico o usuario</label
 					>
 					<input
 						id="email"
-						type="email"
+						type="text"
 						bind:value={email}
 						on:keypress={handleKeyPress}
 						required
 						class="input-field"
-						placeholder="tu@email.com"
+						placeholder="test o test@tracker-monitor.com"
 					/>
 				</div>
 

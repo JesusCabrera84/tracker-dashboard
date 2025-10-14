@@ -43,9 +43,27 @@ class ApiService {
 
 	// Métodos de autenticación
 	async login(credentials) {
-		return this.request('/auth/login', {
-			method: 'POST',
-			body: JSON.stringify(credentials)
+		// Mock de login: acepta únicamente usuario "test" y contraseña "test"
+		const { email, username, password } = credentials || {};
+		const isUserTest = (email === 'test' || email === 'test@tracker-monitor.com' || username === 'test');
+		const isPwdTest = password === 'test';
+
+		return new Promise((resolve, reject) => {
+			// pequeña latencia para simular red
+			setTimeout(() => {
+				if (isUserTest && isPwdTest) {
+					resolve({
+						access_token: 'fake-demo-token',
+						user: {
+							id: 1,
+							name: 'Usuario Test',
+							email: email || 'test@tracker-monitor.com'
+						}
+					});
+				} else {
+					reject(new Error('Invalid credentials'));
+				}
+			}, 400);
 		});
 	}
 
@@ -96,6 +114,20 @@ class ApiService {
 	// Métodos específicos para vehículos
 	async getVehicles() {
 		return this.request('/vehicles', { method: 'GET' });
+	}
+
+	// Mock administrativo: obtener dispositivos del usuario
+	async getDevices(user) {
+		// user puede ser usado en el futuro; por ahora retornamos datos fijos
+		const payload = {
+			devices: [
+				{ id: '0848063597' },
+				{ id: '867564050638581' },
+				{ id: '0848086072' }
+			]
+		};
+
+		return new Promise((resolve) => setTimeout(() => resolve(payload), 300));
 	}
 
 	async getVehicle(vehicleId) {

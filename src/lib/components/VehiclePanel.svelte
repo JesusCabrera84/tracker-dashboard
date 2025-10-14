@@ -10,16 +10,50 @@
 	} from '$lib/stores/vehicleStore.js';
 	import { getStatusColor, getStatusText } from '$lib/utils/vehicleUtils.js';
 	import { mapService } from '$lib/services/mapService.js';
+	import { apiService } from '$lib/services/api.js';
+	import { positionService } from '$lib/services/positionService.js';
+	import { user } from '$lib/stores/auth.js';
 
 	export let showVehiclePanel = false;
 	export let showVehicleList = false;
 
+	let devices = [];
+	let loadingDevices = false;
+	let communications = [];
+
 	async function toggleVehicleList() {
 		showVehicleList = !showVehicleList;
 
-		// Si se está abriendo la lista y no hay vehículos cargados, cargarlos
-		if (showVehicleList && $vehicles.length === 0) {
-			await vehicleActions.loadVehicles();
+		// Si se abre la lista y aún no hay devices, cargarlos del API administrativo mock
+		if (showVehicleList && devices.length === 0) {
+			try {
+				loadingDevices = true;
+				const currentUser = $user; // auto-subscribe al store
+				const resp = await apiService.getDevices(currentUser);
+				devices = resp?.devices || [];
+				// Mapear devices a "vehículos" mínimos para reutilizar el UI actual
+				const mapped = devices.map((d, idx) => ({
+					id: d.id,
+					name: d.id, // mostrar solo deviceId como nombre
+					deviceId: d.id,
+					status: 'active'
+				}));
+				vehicles.set(mapped);
+
+				// Consultar últimas comunicaciones para estos device_ids
+				try {
+					const ids = mapped.map((v) => v.deviceId);
+					const commResp = await positionService.getLatestCommunications(ids);
+					communications = commResp?.communications || commResp || [];
+					console.debug('Últimas comunicaciones cargadas:', communications);
+				} catch (e2) {
+					console.warn('No se pudieron obtener las comunicaciones:', e2);
+				}
+			} catch (e) {
+				console.error('Error cargando dispositivos:', e);
+			} finally {
+				loadingDevices = false;
+			}
 		}
 	}
 
@@ -186,22 +220,7 @@
 											</span>
 										</div>
 										<div class="text-xs text-gray-500">
-											<p>
-												{vehicle.driver || 'Sin conductor'} • {vehicle.location ||
-													'Ubicación desconocida'}
-											</p>
-											{#if vehicle.deviceId}
-												<p>Device: {vehicle.deviceId}</p>
-											{/if}
-											{#if vehicle.latitude && vehicle.longitude}
-												<p>Coords: {vehicle.latitude.toFixed(4)}, {vehicle.longitude.toFixed(4)}</p>
-											{/if}
-											{#if vehicle.speed !== undefined}
-												<p>Velocidad: {vehicle.speed} km/h • Batería: {vehicle.battery || 0}%</p>
-											{/if}
-											{#if vehicle.lastUpdateFormatted}
-												<p>Actualizado: {vehicle.lastUpdateFormatted}</p>
-											{/if}
+											<p>ID: {vehicle.deviceId}</p>
 										</div>
 									</div>
 								</div>

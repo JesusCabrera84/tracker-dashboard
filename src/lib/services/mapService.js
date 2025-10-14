@@ -95,8 +95,8 @@ class MapService {
 
 	addVehicleMarker(vehicle) {
 		// Verificar que tenemos coordenadas válidas
-		const lat = vehicle.latitude || vehicle.lat;
-		const lng = vehicle.longitude || vehicle.lng;
+		const lat = vehicle.latitude || vehicle.latitude;
+		const lng = vehicle.longitude || vehicle.longitude;
 
 		if (!this.google || !this.map || !lat || !lng) {
 			console.warn('No se pueden agregar marcadores sin coordenadas válidas:', vehicle);
@@ -108,7 +108,7 @@ class MapService {
 		const marker = new this.google.maps.Marker({
 			position: position,
 			map: this.map,
-			title: vehicle.name,
+			title: vehicle.device_id,
 			icon: {
 				url:
 					'data:image/svg+xml;charset=UTF-8,' +
@@ -150,28 +150,29 @@ class MapService {
 	}
 
 	createVehicleInfoContent(vehicle) {
+		console.warn('Vehicle info:', vehicle);
 		const speed = vehicle.speed || 0;
-		const battery = vehicle.battery || vehicle.fuel || 0;
-		const lastUpdate = vehicle.lastUpdateFormatted || 'No disponible';
+		const battery = vehicle.main_battery_voltage || 0;
+		const batteryDevice = vehicle.backup_battery_voltage || 0;
+		const lastUpdate = vehicle.gps_datetime || 'No disponible';
 
 		return `
 			<div class="p-3 min-w-48">
-				<h3 class="font-semibold text-gray-900 mb-2">${vehicle.name}</h3>
+				<h3 class="font-semibold text-gray-900 mb-2">${vehicle.device_id}</h3>
 				<div class="space-y-1 text-sm">
-					<p><span class="font-medium">Conductor:</span> ${vehicle.driver || 'No asignado'}</p>
 					<p><span class="font-medium">Estado:</span> 
 						<span class="px-2 py-1 rounded text-xs ${this.getStatusClasses(vehicle.status)}">
 							${this.getStatusText(vehicle.status)}
 						</span>
 					</p>
-					<p><span class="font-medium">Ubicación:</span> ${vehicle.location || 'Desconocida'}</p>
 					<p><span class="font-medium">Velocidad:</span> ${speed} km/h</p>
-					<p><span class="font-medium">Batería:</span> ${battery}%</p>
-					${vehicle.deviceId ? `<p><span class="font-medium">Device ID:</span> ${vehicle.deviceId}</p>` : ''}
+					<p><span class="font-medium">Batería:</span> ${battery} V</p>
+					<p><span class="font-medium">Bater&iacute;a dispositivo:</span> ${batteryDevice || 0} V</p>
+					${vehicle.device_id ? `<p><span class="font-medium">Device ID:</span> ${vehicle.device_id}</p>` : ''}
 					<p><span class="font-medium">Última actualización:</span> ${lastUpdate}</p>
 					${
 						vehicle.latitude && vehicle.longitude
-							? `<p><span class="font-medium">Coordenadas:</span> ${vehicle.latitude.toFixed(6)}, ${vehicle.longitude.toFixed(6)}</p>`
+							? `<p><span class="font-medium">Coordenadas:</span> ${vehicle.latitude}, ${vehicle.longitude}</p>`
 							: ''
 					}
 				</div>
@@ -231,7 +232,7 @@ class MapService {
 
 	// Actualizar marcador de vehículo existente
 	updateVehicleMarker(vehicle) {
-		const existingMarkerData = this.markers.get(vehicle.id);
+		const existingMarkerData = this.markers.get(vehicle.device_id);
 
 		if (existingMarkerData) {
 			// Actualizar posición

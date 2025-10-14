@@ -3,11 +3,34 @@
  */
 
 const API_BASE_URL = 'http://34.237.30.30:8080';
+// Base para API administrativa de comunicaciones (puede ser distinta)
+const COMM_BASE_URL = import.meta.env?.VITE_COMM_BASE_URL || 'http://10.8.0.1:8000';
 
 class PositionService {
 	constructor() {
 		this.cache = new Map();
 		this.cacheTimeout = 30000; // 30 segundos
+	}
+
+	/**
+	 * Obtiene las últimas comunicaciones por lista de device_ids
+	 * @param {string[]} deviceIds - IDs de dispositivos
+	 * @returns {Promise<Object>} Respuesta de comunicaciones
+	 */
+	async getLatestCommunications(deviceIds = []) {
+		if (!Array.isArray(deviceIds) || deviceIds.length === 0) {
+			return { communications: [] };
+		}
+		const url = new URL('/api/v1/communications/latest', COMM_BASE_URL);
+		deviceIds.forEach((id) => url.searchParams.append('device_ids', id));
+		try {
+			const res = await fetch(url.toString(), { method: 'GET' });
+			if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+			return await res.json();
+		} catch (err) {
+			console.error('Error fetching latest communications:', err);
+			throw err;
+		}
 	}
 
 	/**

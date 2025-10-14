@@ -33,8 +33,8 @@ function createAuthStore() {
 		},
 		init: () => {
 			if (browser) {
-				// En modo desarrollo o con BYPASS, autenticar mock
-				if (dev || BYPASS) {
+				// Solo con BYPASS, autenticar mock automáticamente
+				if (BYPASS) {
 					console.log('🔧 Bypass de autenticación activo: usuario mock autenticado');
 					set(mockUser);
 					localStorage.setItem('user', JSON.stringify(mockUser));
@@ -67,8 +67,8 @@ function createTokenStore() {
 		},
 		getToken: () => {
 			if (browser) {
-				// En modo desarrollo o BYPASS, devolver token mock
-				if (dev || BYPASS) {
+				// Solo con BYPASS, devolver token mock
+				if (BYPASS) {
 					return 'mock-dev-token';
 				}
 				return localStorage.getItem('token');
@@ -82,8 +82,8 @@ function createTokenStore() {
 			}
 		},
 		init: () => {
-			if (browser && (dev || BYPASS)) {
-				// En desarrollo o con BYPASS, establecer token mock
+			if (browser && BYPASS) {
+				// Solo con BYPASS, establecer token mock
 				set('mock-dev-token');
 				localStorage.setItem('token', 'mock-dev-token');
 			}
