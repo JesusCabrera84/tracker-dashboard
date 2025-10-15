@@ -9,6 +9,7 @@
   import { fade } from 'svelte/transition';
   import UserPanel from '$lib/components/UserPanel.svelte';
   import VehiclePanel from '$lib/components/VehiclePanel.svelte';
+  import OptionPanel from '$lib/components/OptionPanel.svelte'
   import MapContainer from '$lib/components/MapContainer.svelte';
 
   let isLoading = true;
@@ -16,6 +17,7 @@
   let showVehiclePanel = false;
   let showUserPanel = false;
   let showVehicleList = false;
+  let showOptionPanel = false;
   let showToast = false;
   let toastTimeout;
 
@@ -117,6 +119,8 @@
     <UserPanel bind:showUserPanel {userData} />
 
     <VehiclePanel bind:showVehiclePanel bind:showVehicleList />
+
+	<OptionPanel bind:showOptionPanel />
   </div>
 
   <!-- Contenedor del mapa -->

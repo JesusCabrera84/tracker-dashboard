@@ -12,16 +12,6 @@
 		goto('/login');
 	}
 
-	function setModern() {
-		theme.set('modern');
-	}
-	function setClassic() {
-		theme.set('classic');
-	}
-
-	function setDark() {
-		theme.set('dark');
-	}
 </script>
 
 <button
@@ -59,21 +49,7 @@
 							<span class="text-sm text-app">{userData.name}</span>
 						</div>
 
-			<!-- Cambiar tema -->
-			<div class="p-3 rounded-lg panel">
-				<p class="text-sm font-medium mb-2 text-app">Tema</p>
-				<div class="flex gap-2">
-					<button class="btn-primary px-3 py-1 w-auto" on:click={setModern}>
-						Moderno
-					</button>
-					<button class="btn-secondary" on:click={setClassic}>
-						Clásico
-					</button>
-					<button class="btn-secondary" on:click={setDark}>
-						Dark
-					</button>
-				</div>
-			</div>
+			
 						<div class="flex items-center gap-2">
 							<svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
 								<path

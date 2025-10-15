@@ -212,7 +212,8 @@ section::before {
 
 .nav-bar {
 	@apply fixed left-4 top-1/5 -translate-y-1/2 z-40 pt-5 pb-5 border-2 border-white/20 rounded-full shadow-lg shadow-sky-500/80 hover:shadow-xl;
-	isolation: isolate; /* ensure backdrop-filter descendants composite over page */
+	background: var(--glass-bg);
+	backdrop-filter: blur(5px);
 }
 
 .nav-bar .menu-separator {
@@ -234,6 +235,7 @@ section::before {
 	will-change: backdrop-filter; /* hint GPU */
 	background-clip: padding-box; /* keep border crisp while background is translucent */
 }
+
 
 .nav-bar .menu-card .controls {
 	@apply space-y-3;
