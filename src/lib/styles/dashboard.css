@@ -38,25 +38,3 @@
 		);
 	}
 }
-
-.gm-style .gm-style-iw {
-  background-color: var(--app-bg) !important;
-  padding-left: 10px !important;
-  padding-right: 10px !important;
-  border-radius: 16px !important;
-  box-shadow: 0 2px 7px 1px var(--glass-bg);
-  padding-bottom: 20px !important;
-
-}
-
-.gm-style-iw-chr {
-	padding: 0 !important;
-}
-
-gm-style-iw-chr button {
-	color: aqua !important;
-}
-
-.gm-style-iw-d {
-	overflow: hidden;
-}

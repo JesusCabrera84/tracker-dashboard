@@ -31,6 +31,8 @@
     --input-text: #e5e7eb; /* text-app */
     --input-placeholder: rgba(229, 231, 235, 0.6);
     --input-border: var(--glass-border);
+    /* Google Maps */
+    --info-window-text: #272727;
 }
 
 /* Tema oscuro (grises oscuros) */
@@ -64,6 +66,7 @@
     --input-text: #e5e7eb;
     --input-placeholder: rgba(229, 231, 235, 0.6);
     --input-border: var(--glass-border);
+    --info-window-text: #00327c;
 }
 
 /* Tema clásico (paleta estándar clara) */
@@ -96,11 +99,12 @@
     --input-text: #111827; /* gray-900 */
     --input-placeholder: #6b7280; /* gray-500 */
     --input-border: rgba(0, 0, 0, 0.12);
+    --info-window-text: #0b1524;
 }
 
 /* Utilidades basadas en tema */
 .bg-app { background: var(--app-bg); color: var(--app-text); }
-.text-app { color: var(--app-text); }
+.text-app { color: var(--info-window-text); }
 .accent-border { border-color: var(--accent-cyan); }
 .loading-overlay { background: var(--glass-bg); }
 .toast-card { background: var(--glass-bg); color: var(--app-text); border: 1px solid var(--glass-border); }
