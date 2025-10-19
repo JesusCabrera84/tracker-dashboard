@@ -184,7 +184,7 @@ class MapService {
 		const lastUpdate = vehicle.gps_datetime || 'No disponible';
 
 		return `
-			<div class="p-3 min-w-48 text-app">
+			<div class="text-app">
 				<h3 class="font-semibold text-app mb-2">${vehicle.device_id}</h3>
 				<div class="space-y-1 text-sm text-app">
 					<p><span class="font-medium text-app">Estado:</span> 

@@ -2,6 +2,8 @@
  * Servicio para consultar posiciones de vehículos desde la API
  */
 
+import { vehicleActions } from '../stores/vehicleStore.js';
+
 const API_BASE_URL = 'http://34.237.30.30:8080';
 // Base para API administrativa de comunicaciones (puede ser distinta)
 const COMM_BASE_URL = import.meta.env?.VITE_COMM_BASE_URL || 'http://10.8.0.1:8000';
@@ -147,6 +149,55 @@ class PositionService {
 	}
 
 	/**
+	 * Normaliza los datos del stream de posición para el formato interno
+	 * @param {Object} streamData - Datos crudos del stream
+	 * @returns {Object} Datos normalizados
+	 */
+	normalizeStreamData(streamData) {
+		// Extraer coordenadas - intentar múltiples fuentes
+		let latitude = null;
+		let longitude = null;
+
+		// Intentar desde los campos principales primero
+		if (streamData.LATITUD && streamData.LONGITUD) {
+			latitude = parseFloat(streamData.LATITUD);
+			longitude = parseFloat(streamData.LONGITUD);
+		}
+		// Si no están disponibles, intentar desde decoded
+		else if (streamData.decoded?.QueclinkRaw?.LAT && streamData.decoded?.QueclinkRaw?.LON) {
+			latitude = parseFloat(streamData.decoded.QueclinkRaw.LAT);
+			longitude = parseFloat(streamData.decoded.QueclinkRaw.LON);
+		}
+
+		// Extraer otros datos importantes
+		const deviceId = streamData.DEVICE_ID || streamData.decoded?.QueclinkRaw?.DEVICE_ID;
+		const speed = streamData.SPEED ? parseFloat(streamData.SPEED) :
+					 (streamData.decoded?.QueclinkRaw?.SPD ? parseFloat(streamData.decoded.QueclinkRaw.SPD) : 0);
+		const odometer = streamData.ODOMETER ? parseFloat(streamData.ODOMETER) :
+						(streamData.decoded?.QueclinkRaw?.KILOMETERS ? parseFloat(streamData.decoded.QueclinkRaw.KILOMETERS) : 0);
+		const altitude = streamData.ALTITUDE ? parseFloat(streamData.ALTITUDE) :
+						(streamData.decoded?.QueclinkRaw?.ALTITUDE ? parseFloat(streamData.decoded.QueclinkRaw.ALTITUDE) : 0);
+
+		// Determinar el estado basado en si hay coordenadas válidas
+		const status = (latitude != null && longitude != null && !isNaN(latitude) && !isNaN(longitude)) ? 'active' : 'inactive';
+
+		return {
+			deviceId,
+			latitude,
+			longitude,
+			speed,
+			altitude,
+			odometer,
+			status,
+			// Datos adicionales para debugging
+			rawLatitude: streamData.LATITUD || streamData.decoded?.QueclinkRaw?.LAT,
+			rawLongitude: streamData.LONGITUD || streamData.decoded?.QueclinkRaw?.LON,
+			fix: streamData.FIX_ || streamData.decoded?.QueclinkRaw?.FIX,
+			course: streamData.COURSE || streamData.decoded?.QueclinkRaw?.CRS
+		};
+	}
+
+	/**
 	 * Limpia el cache
 	 */
 	clearCache() {
@@ -180,11 +231,56 @@ class PositionService {
 			// Manejar mensajes de actualización
 			eventSource.onmessage = (event) => {
 				try {
-					const data = JSON.parse(event.data);
-					console.warn('Real-time position update:', data);
+					const rawData = JSON.parse(event.data);
+					console.warn('Real-time position update:', rawData);
 
+					// Extraer datos del stream - la información está en la propiedad "data"
+					const streamData = rawData?.data;
+					if (!streamData) {
+						console.warn('No data property found in stream message');
+						return;
+					}
+
+					// Normalizar los datos para el formato esperado por el sistema
+					const normalizedData = this.normalizeStreamData(streamData);
+
+					// Actualizar posición en el store de vehículos
+					if (normalizedData.deviceId && normalizedData.latitude != null && normalizedData.longitude != null) {
+						vehicleActions.updateVehiclePosition(normalizedData.deviceId, {
+							latitude: normalizedData.latitude,
+							longitude: normalizedData.longitude,
+							speed: normalizedData.speed || 0,
+							altitude: normalizedData.altitude || 0,
+							odometer: normalizedData.odometer || 0,
+							lastUpdate: new Date().toISOString(),
+							status: normalizedData.status || 'active',
+							// Datos adicionales del stream
+							cellId: streamData.CELL_ID,
+							lac: streamData.LAC,
+							mcc: streamData.MCC,
+							mnc: streamData.MNC,
+							fix: streamData.FIX_,
+							course: streamData.COURSE,
+							msgCounter: streamData.MSG_COUNTER,
+							rawData: streamData
+						});
+					}
+
+					// Llamar al callback del dashboard si existe (para compatibilidad)
 					if (onUpdate && typeof onUpdate === 'function') {
-						onUpdate(data);
+						// Crear objeto en formato esperado por el dashboard
+						const dashboardData = {
+							device_id: normalizedData.deviceId,
+							latitude: normalizedData.latitude,
+							longitude: normalizedData.longitude,
+							speed: normalizedData.speed || 0,
+							altitude: normalizedData.altitude || 0,
+							gps_datetime: new Date().toISOString(),
+							main_battery_voltage: 0, // No disponible en stream
+							backup_battery_voltage: 0, // No disponible en stream
+							status: normalizedData.status || 'active'
+						};
+						onUpdate(dashboardData);
 					}
 				} catch (parseError) {
 					console.error('Error parsing real-time data:', parseError);
