@@ -154,14 +154,71 @@ class PositionService {
 	}
 
 	/**
-	 * Obtiene el estado del cache
+	 * Obtiene posiciones en tiempo real usando Server-Sent Events (SSE)
+	 * @param {string[]} deviceIds - IDs de dispositivos a monitorear
+	 * @param {Function} onUpdate - Callback para manejar actualizaciones de posición
+	 * @param {Function} onError - Callback para manejar errores
+	 * @returns {Object} Controlador para manejar la conexión
 	 */
-	getCacheStatus() {
-		return {
-			size: this.cache.size,
-			entries: Array.from(this.cache.keys())
-		};
+	connectToRealtimeStream(deviceIds = [], onUpdate = null, onError = null) {
+		if (!Array.isArray(deviceIds) || deviceIds.length === 0) {
+			console.warn('No device IDs provided for real-time streaming');
+			return null;
+		}
+
+		// Crear la URL para el streaming
+		const deviceIdsParam = deviceIds.join(',');
+		const streamUrl = `${COMM_BASE_URL}/api/v1/stream?device_ids=${deviceIdsParam}`;
+
+		console.warn('Connecting to real-time stream:', streamUrl);
+
+		try {
+			const eventSource = new EventSource(streamUrl, {
+				withCredentials: false
+			});
+
+			// Manejar mensajes de actualización
+			eventSource.onmessage = (event) => {
+				try {
+					const data = JSON.parse(event.data);
+					console.warn('Real-time position update:', data);
+
+					if (onUpdate && typeof onUpdate === 'function') {
+						onUpdate(data);
+					}
+				} catch (parseError) {
+					console.error('Error parsing real-time data:', parseError);
+				}
+			};
+
+			// Manejar errores de conexión
+			eventSource.onerror = (error) => {
+				console.error('Real-time stream error:', error);
+
+				if (onError && typeof onError === 'function') {
+					onError(error);
+				}
+			};
+
+			// Manejar conexión abierta
+			eventSource.onopen = () => {
+				console.warn('Real-time stream connected successfully');
+			};
+
+			return {
+				eventSource,
+				close: () => {
+					eventSource.close();
+					console.warn('Real-time stream disconnected');
+				}
+			};
+		} catch (error) {
+			console.error('Error creating EventSource connection:', error);
+			if (onError && typeof onError === 'function') {
+				onError(error);
+			}
+			return null;
+		}
 	}
 }
-
 export const positionService = new PositionService();

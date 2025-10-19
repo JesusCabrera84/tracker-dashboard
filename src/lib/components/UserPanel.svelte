@@ -5,6 +5,7 @@
 
 	export let showUserPanel = false;
 	export let userData = null;
+	export let toggleUserPanel = null;
 
 	function handleLogout() {
 		user.logout();
@@ -15,7 +16,7 @@
 </script>
 
 <button
-	on:click={() => (showUserPanel = !showUserPanel)}
+	on:click={toggleUserPanel || (() => (showUserPanel = !showUserPanel))}
 	aria-label="Abrir panel de información de usuario"
 	class="nav-button"
 >

@@ -20,6 +20,31 @@
   let showOptionPanel = false;
   let showToast = false;
   let toastTimeout;
+  
+  // Funciones exclusivas para abrir/cerrar menús sin ciclos
+  function toggleUserPanel() {
+    showUserPanel = !showUserPanel;
+    if (showUserPanel) {
+      showVehiclePanel = false;
+      showOptionPanel = false;
+    }
+  }
+
+  function toggleVehiclePanel() {
+    showVehiclePanel = !showVehiclePanel;
+    if (showVehiclePanel) {
+      showUserPanel = false;
+      showOptionPanel = false;
+    }
+  }
+
+  function toggleOptionPanel() {
+    showOptionPanel = !showOptionPanel;
+    if (showOptionPanel) {
+      showUserPanel = false;
+      showVehiclePanel = false;
+    }
+  }
 
   $: {
     if ($loadingVehicles || $loadingPositions) {
@@ -33,6 +58,10 @@
   }
 
   let loadedOnce = false;
+  let realtimeConnection = null;
+  let reconnectAttempts = 0;
+  let maxReconnectAttempts = 5;
+  let reconnectDelay = 5000; // 5 segundos
 
   function normalizeCommToVehicle(c) {
     const deviceId = c?.device_id || c?.deviceId || c?.device?.id || c?.id || 'unknown';
@@ -92,12 +121,84 @@
               mapService.updateVehicleMarker(v);
             }
           });
+
+          // Iniciar conexión de tiempo real después de cargar posiciones iniciales
+          startRealtimeConnection(ids);
         } catch (e2) {
           console.warn('No se pudieron obtener las comunicaciones en page load:', e2);
         }
       }
     } catch (e) {
       console.error('Error cargando devices en page load:', e);
+    }
+  }
+
+  function startRealtimeConnection(deviceIds) {
+    // Cerrar conexión existente si la hay
+    if (realtimeConnection) {
+      realtimeConnection.close();
+      realtimeConnection = null;
+    }
+
+    // Resetear contador de reintentos si se inicia una nueva conexión
+    if (reconnectAttempts > 0) {
+      console.warn(`Reconnecting... Attempt ${reconnectAttempts + 1}/${maxReconnectAttempts}`);
+    }
+
+    console.warn('Starting real-time connection for devices:', deviceIds);
+
+    try {
+      realtimeConnection = positionService.connectToRealtimeStream(
+        deviceIds,
+        // onUpdate callback
+        (data) => {
+          console.warn('Real-time update received:', data);
+
+          // Resetear contador de reintentos en conexión exitosa
+          reconnectAttempts = 0;
+
+          // Normalizar los datos del vehículo
+          const vehicleData = normalizeCommToVehicle(data);
+
+          // Verificar que tenemos coordenadas válidas
+          if (vehicleData.latitude != null && vehicleData.longitude != null) {
+            // Actualizar el marcador en el mapa
+            mapService.updateVehicleMarker(vehicleData);
+
+            // Actualizar el indicador de carga
+            loadingPositions.set(false);
+          }
+        },
+        // onError callback
+        (error) => {
+          console.error('Real-time connection error:', error);
+
+          // Implementar lógica de reconexión con backoff exponencial
+          if (reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            const delay = reconnectDelay * Math.pow(2, reconnectAttempts - 1); // Backoff exponencial
+
+            console.warn(`Real-time connection lost. Retrying in ${delay / 1000} seconds... (Attempt ${reconnectAttempts}/${maxReconnectAttempts})`);
+
+            setTimeout(() => {
+              startRealtimeConnection(deviceIds);
+            }, delay);
+          } else {
+            console.error('Max reconnection attempts reached. Real-time updates disabled.');
+            // Aquí podrías mostrar un mensaje al usuario o intentar reconectar manualmente
+          }
+        }
+      );
+    } catch (error) {
+      console.error('Error starting real-time connection:', error);
+
+      // Intentar reconectar incluso si falla la creación inicial
+      if (reconnectAttempts < maxReconnectAttempts) {
+        reconnectAttempts++;
+        setTimeout(() => {
+          startRealtimeConnection(deviceIds);
+        }, reconnectDelay);
+      }
     }
   }
 
@@ -111,18 +212,28 @@
       }
     });
     loadDevicesAndCommunications(userData);
+
+    // Cleanup function
+    return () => {
+      unsubscribe();
+      if (realtimeConnection) {
+        realtimeConnection.close();
+        realtimeConnection = null;
+      }
+    };
   });
 </script>
 
 <div class="h-screen w-screen relative overflow-hidden bg-app">
   <div class="nav-bar">
-    <UserPanel bind:showUserPanel {userData} />
+    <UserPanel bind:showUserPanel {userData} {toggleUserPanel} />
 
-    <VehiclePanel bind:showVehiclePanel bind:showVehicleList />
+    <VehiclePanel bind:showVehiclePanel bind:showVehicleList {toggleVehiclePanel} />
 
-	<OptionPanel bind:showOptionPanel />
+	<OptionPanel bind:showOptionPanel {toggleOptionPanel} />
   </div>
-
+  
+  
   <!-- Contenedor del mapa -->
   <MapContainer bind:isLoading />
 

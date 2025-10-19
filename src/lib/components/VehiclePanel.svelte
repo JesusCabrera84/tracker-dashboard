@@ -16,46 +16,11 @@
 
 	export let showVehiclePanel = false;
 	export let showVehicleList = false;
+	export let toggleVehiclePanel = null;
 
 	let devices = [];
 	let loadingDevices = false;
 	let communications = [];
-
-	async function toggleVehicleList() {
-		showVehicleList = !showVehicleList;
-
-		// Si se abre la lista y aún no hay devices, cargarlos del API administrativo mock
-		if (showVehicleList && devices.length === 0) {
-			try {
-				loadingDevices = true;
-				const currentUser = $user; // auto-subscribe al store
-				const resp = await apiService.getDevices(currentUser);
-				devices = resp?.devices || [];
-				// Mapear devices a "vehículos" mínimos para reutilizar el UI actual
-				const mapped = devices.map((d, idx) => ({
-					id: d.id,
-					name: d.id, // mostrar solo deviceId como nombre
-					deviceId: d.id,
-					status: 'active'
-				}));
-				vehicles.set(mapped);
-
-				// Consultar últimas comunicaciones para estos device_ids
-				try {
-					const ids = mapped.map((v) => v.deviceId);
-					const commResp = await positionService.getLatestCommunications(ids);
-					communications = commResp?.communications || commResp || [];
-					console.debug('Últimas comunicaciones cargadas:', communications);
-				} catch (e2) {
-					console.warn('No se pudieron obtener las comunicaciones:', e2);
-				}
-			} catch (e) {
-				console.error('Error cargando dispositivos:', e);
-			} finally {
-				loadingDevices = false;
-			}
-		}
-	}
 
 	function toggleVehicleSelection(vehicleId) {
 		vehicleActions.toggleVehicleSelection(vehicleId);
@@ -93,7 +58,7 @@
 
 <!-- Botón del vehículo -->
 <button
-	on:click={() => (showVehiclePanel = !showVehiclePanel)}
+	on:click={toggleVehiclePanel || (() => (showVehiclePanel = !showVehiclePanel))}
 	aria-label="Abrir panel de control de vehículos"
 	class="nav-button"
 >

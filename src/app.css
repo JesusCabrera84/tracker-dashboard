@@ -7,13 +7,14 @@
     --light-cream: #fdfdf9;
     --glass-bg: rgba(255, 255, 255, 0.12);
     --glass-border: rgba(255, 255, 255, 0.25);
+	--acent: #1290CB;
     /* Nuevas variables */
     --app-bg: #0b1524; /* fondo oscuro acorde al mapa */
     --app-text: #e5e7eb; /* gris claro */
     --panel-bg: rgba(255, 255, 255, 0.06);
     --panel-border: rgba(255, 255, 255, 0.18);
-    --btn-primary-bg: linear-gradient(135deg, #2563eb, #1d4ed8);
-    --btn-primary-hover-bg: linear-gradient(135deg, #1e40af, #1d4ed8);
+    --btn-primary-bg: linear-gradient(135deg, #567ccf, #435ca0);
+    --btn-primary-hover-bg: linear-gradient(135deg, #3c65eb, #2955cf);
     --btn-secondary-bg: rgba(255, 255, 255, 0.12);
     --btn-secondary-hover-bg: rgba(255, 255, 255, 0.2);
     /* Status colors */
@@ -38,6 +39,7 @@
     --light-cream: #e5e7eb; /* texto claro */
     --glass-bg: rgba(77, 77, 77, 0.2);
     --glass-border: rgba(255, 255, 255, 0.18);
+	--acent: #dce4e7;
     /* Base */
     --app-bg: #0f1115; /* gris/neutro muy oscuro */
     --app-text: #e5e7eb; /* gris claro */
@@ -70,13 +72,14 @@
     --light-cream: #f9fafb; /* gris muy claro */
     --glass-bg: rgba(216, 218, 221, 0.2);
     --glass-border: rgba(0, 0, 0, 0.08);
+	--acent: #222222;
     /* Nuevas variables */
     --app-bg: #ffffff;
     --app-text: #111827; /* gray-900 */
     --panel-bg: #ffffff;
     --panel-border: rgba(0, 0, 0, 0.08);
-    --btn-primary-bg: #2563eb;
-    --btn-primary-hover-bg: #1d4ed8;
+    --btn-primary-bg: #3e73e6;
+    --btn-primary-hover-bg: #2d5ad6;
     --btn-secondary-bg: #e5e7eb; /* gray-200 */
     --btn-secondary-hover-bg: #d1d5db; /* gray-300 */
     /* Status colors */
@@ -211,9 +214,13 @@ section::before {
 }
 
 .nav-bar {
-	@apply fixed left-4 top-1/5 -translate-y-1/2 z-40 pt-5 pb-5 border-2 border-white/20 rounded-full shadow-lg shadow-sky-500/80 hover:shadow-xl;
+	@apply fixed left-4 top-1/5 -translate-y-1/2 z-40 pt-5 pb-5 border-2 border-white/20 rounded-full shadow-lg transition-all duration-200;
 	background: var(--glass-bg);
-	backdrop-filter: blur(5px);
+}
+
+.nav-bar:hover {
+	@apply shadow-xl;
+	box-shadow: 0 5px 5px 0 var(--acent);
 }
 
 .nav-bar .menu-separator {
@@ -225,6 +232,7 @@ section::before {
 
 .nav-bar .menu-icon {
 	@apply w-8 h-8;
+	fill: var(--acent);
 }
 
 .nav-bar .menu-card {
