@@ -12,7 +12,6 @@
 		authToken.clearToken();
 		goto('/login');
 	}
-
 </script>
 
 <button
@@ -50,7 +49,6 @@
 							<span class="text-sm text-app">{userData.name}</span>
 						</div>
 
-			
 						<div class="flex items-center gap-2">
 							<svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
 								<path

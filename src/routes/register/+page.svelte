@@ -88,9 +88,7 @@
 				{/if}
 
 				<div>
-					<label for="name" class="block text-sm font-medium text-app">
-						Nombre Completo
-					</label>
+					<label for="name" class="block text-sm font-medium text-app"> Nombre Completo </label>
 					<input
 						id="name"
 						type="text"
@@ -103,9 +101,7 @@
 				</div>
 
 				<div>
-					<label for="email" class="block text-sm font-medium text-app">
-						Correo Electrónico
-					</label>
+					<label for="email" class="block text-sm font-medium text-app"> Correo Electrónico </label>
 					<input
 						id="email"
 						type="email"
@@ -179,9 +175,7 @@
 			<div class="mt-6 text-center">
 				<p class="text-sm text-app">
 					¿Ya tienes una cuenta?
-					<a href="/login" class="font-medium text-accent">
-						Inicia sesión aquí
-					</a>
+					<a href="/login" class="font-medium text-accent"> Inicia sesión aquí </a>
 				</p>
 			</div>
 		</div>

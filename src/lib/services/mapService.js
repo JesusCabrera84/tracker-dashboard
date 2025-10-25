@@ -18,7 +18,7 @@ class MapService {
 		try {
 			const loader = new GoogleMapsLoader.Loader({
 				apiKey: this.apiKey,
-				version: 'weekly',
+				version: 'weekly'
 			});
 
 			this.google = await loader.load();
@@ -184,22 +184,22 @@ class MapService {
 		const lastUpdate = vehicle.gps_datetime || 'No disponible';
 
 		return `
-			<div class="text-app">
-				<h3 class="font-semibold text-app mb-2">${vehicle.device_id}</h3>
-				<div class="space-y-1 text-sm text-app">
-					<p><span class="font-medium text-app">Estado:</span> 
+			<div class="info-window-text">
+				<h3 class="font-semibold mb-2">${vehicle.device_id}</h3>
+				<div class="space-y-1 text-sm">
+					<p><span class="font-medium">Estado:</span> 
 						<span class="px-2 py-1 text-xs ${getStatusBadgeClass(vehicle.status)}">
 							${this.getStatusText(vehicle.status)}
 						</span>
 					</p>
-					<p><span class="font-medium text-app">Velocidad:</span> ${speed} km/h</p>
-					<p><span class="font-medium text-app">Batería:</span> ${battery} V</p>
-					<p><span class="font-medium text-app">Bater&iacute;a dispositivo:</span> ${batteryDevice || 0} V</p>
-					${vehicle.device_id ? `<p><span class=\"font-medium text-app\">Device ID:</span> ${vehicle.device_id}</p>` : ''}
-					<p><span class="font-medium text-app">Última actualización:</span> ${lastUpdate}</p>
+					<p><span class="font-medium ">Velocidad:</span> ${speed} km/h</p>
+					<p><span class="font-medium ">Batería:</span> ${battery} V</p>
+					<p><span class="font-medium ">Bater&iacute;a dispositivo:</span> ${batteryDevice || 0} V</p>
+					${vehicle.device_id ? `<p><span class=\"font-medium \">Device ID:</span> ${vehicle.device_id}</p>` : ''}
+					<p><span class="font-medium ">Última actualización:</span> ${lastUpdate}</p>
 					${
 						vehicle.latitude && vehicle.longitude
-							? `<p><span class=\"font-medium text-app\">Coordenadas:</span> ${vehicle.latitude}, ${vehicle.longitude}</p>`
+							? `<p><span class=\"font-medium\">Coordenadas:</span> ${vehicle.latitude}, ${vehicle.longitude}</p>`
 							: ''
 					}
 				</div>

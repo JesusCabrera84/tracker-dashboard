@@ -53,7 +53,10 @@
 	{#if isLoading}
 		<div class="flex items-center justify-center h-full loading-overlay">
 			<div class="text-center">
-				<div class="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style="border-color: var(--accent-cyan)"></div>
+				<div
+					class="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
+					style="border-color: var(--accent-cyan)"
+				></div>
 				<p class="font-medium text-app">Cargando mapa...</p>
 			</div>
 		</div>

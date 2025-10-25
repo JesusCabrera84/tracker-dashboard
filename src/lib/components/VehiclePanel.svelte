@@ -146,7 +146,10 @@
 
 					{#if $loadingVehicles || $loadingPositions}
 						<div class="flex items-center justify-center py-4">
-							<div class="animate-spin rounded-full h-6 w-6 border-b-2" style="border-color: var(--accent-cyan)"></div>
+							<div
+								class="animate-spin rounded-full h-6 w-6 border-b-2"
+								style="border-color: var(--accent-cyan)"
+							></div>
 							<span class="ml-2 text-sm text-app">
 								{$loadingVehicles ? 'Cargando vehículos...' : 'Actualizando posiciones...'}
 							</span>
@@ -164,12 +167,14 @@
 									/>
 									<div class="flex-1 min-w-0">
 										<div class="flex items-center justify-between">
-											<button class="text-sm font-medium truncate text-app text-left" on:click={() => centerOnVehicle(vehicle)} title="Centrar en el mapa">
+											<button
+												class="text-sm font-medium truncate text-app text-left"
+												on:click={() => centerOnVehicle(vehicle)}
+												title="Centrar en el mapa"
+											>
 												{vehicle.name}
 											</button>
-											<span
-												class="text-xs px-2 py-1 {getStatusBadgeClass(vehicle.status)}"
-											>
+											<span class="text-xs px-2 py-1 {getStatusBadgeClass(vehicle.status)}">
 												{getStatusText(vehicle.status)}
 											</span>
 										</div>
@@ -189,7 +194,10 @@
 										? 's'
 										: ''}
 								</p>
-								<button class="btn-primary w-full text-xs px-3 py-2" on:click={trackSelectedVehicles}>
+								<button
+									class="btn-primary w-full text-xs px-3 py-2"
+									on:click={trackSelectedVehicles}
+								>
 									Rastrear Seleccionados
 								</button>
 							</div>
@@ -239,10 +247,11 @@
 		<div class="mt-4 p-3 rounded-lg panel">
 			<p class="text-xs text-app font-medium mb-1">Estado del Sistema</p>
 			<div class="flex items-center gap-2">
-				<div class="w-2 h-2 rounded-full animate-pulse" style="background: var(--accent-cyan)"></div>
-				<span class="text-xs text-app"
-					>Conectado - {$activeVehicles.length} vehículos activos</span
-				>
+				<div
+					class="w-2 h-2 rounded-full animate-pulse"
+					style="background: var(--accent-cyan)"
+				></div>
+				<span class="text-xs text-app">Conectado - {$activeVehicles.length} vehículos activos</span>
 			</div>
 			{#if $selectedVehicleCount > 0}
 				<div class="flex items-center gap-2 mt-1">

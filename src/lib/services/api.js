@@ -45,7 +45,8 @@ class ApiService {
 	async login(credentials) {
 		// Mock de login: acepta únicamente usuario "test" y contraseña "test"
 		const { email, username, password } = credentials || {};
-		const isUserTest = (email === 'test' || email === 'test@tracker-monitor.com' || username === 'test');
+		const isUserTest =
+			email === 'test' || email === 'test@tracker-monitor.com' || username === 'test';
 		const isPwdTest = password === 'test';
 
 		return new Promise((resolve, reject) => {
@@ -120,11 +121,7 @@ class ApiService {
 	async getDevices(user) {
 		// user puede ser usado en el futuro; por ahora retornamos datos fijos
 		const payload = {
-			devices: [
-				{ id: '0848063597' },
-				{ id: '867564050638581' },
-				{ id: '0848086072' }
-			]
+			devices: [{ id: '0848063597' }, { id: '867564050638581' }, { id: '0848086072' }]
 		};
 
 		return new Promise((resolve) => setTimeout(() => resolve(payload), 300));

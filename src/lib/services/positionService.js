@@ -4,7 +4,7 @@
 
 import { vehicleActions } from '../stores/vehicleStore.js';
 
-const API_BASE_URL = 'http://34.237.30.30:8080';
+const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || 'http://34.237.30.30:8080';
 // Base para API administrativa de comunicaciones (puede ser distinta)
 const COMM_BASE_URL = import.meta.env?.VITE_COMM_BASE_URL || 'http://10.8.0.1:8000';
 
@@ -171,15 +171,27 @@ class PositionService {
 
 		// Extraer otros datos importantes
 		const deviceId = streamData.DEVICE_ID || streamData.decoded?.QueclinkRaw?.DEVICE_ID;
-		const speed = streamData.SPEED ? parseFloat(streamData.SPEED) :
-					 (streamData.decoded?.QueclinkRaw?.SPD ? parseFloat(streamData.decoded.QueclinkRaw.SPD) : 0);
-		const odometer = streamData.ODOMETER ? parseFloat(streamData.ODOMETER) :
-						(streamData.decoded?.QueclinkRaw?.KILOMETERS ? parseFloat(streamData.decoded.QueclinkRaw.KILOMETERS) : 0);
-		const altitude = streamData.ALTITUDE ? parseFloat(streamData.ALTITUDE) :
-						(streamData.decoded?.QueclinkRaw?.ALTITUDE ? parseFloat(streamData.decoded.QueclinkRaw.ALTITUDE) : 0);
+		const speed = streamData.SPEED
+			? parseFloat(streamData.SPEED)
+			: streamData.decoded?.QueclinkRaw?.SPD
+				? parseFloat(streamData.decoded.QueclinkRaw.SPD)
+				: 0;
+		const odometer = streamData.ODOMETER
+			? parseFloat(streamData.ODOMETER)
+			: streamData.decoded?.QueclinkRaw?.KILOMETERS
+				? parseFloat(streamData.decoded.QueclinkRaw.KILOMETERS)
+				: 0;
+		const altitude = streamData.ALTITUDE
+			? parseFloat(streamData.ALTITUDE)
+			: streamData.decoded?.QueclinkRaw?.ALTITUDE
+				? parseFloat(streamData.decoded.QueclinkRaw.ALTITUDE)
+				: 0;
 
 		// Determinar el estado basado en si hay coordenadas válidas
-		const status = (latitude != null && longitude != null && !isNaN(latitude) && !isNaN(longitude)) ? 'active' : 'inactive';
+		const status =
+			latitude != null && longitude != null && !isNaN(latitude) && !isNaN(longitude)
+				? 'active'
+				: 'inactive';
 
 		return {
 			deviceId,
@@ -245,7 +257,11 @@ class PositionService {
 					const normalizedData = this.normalizeStreamData(streamData);
 
 					// Actualizar posición en el store de vehículos
-					if (normalizedData.deviceId && normalizedData.latitude != null && normalizedData.longitude != null) {
+					if (
+						normalizedData.deviceId &&
+						normalizedData.latitude != null &&
+						normalizedData.longitude != null
+					) {
 						vehicleActions.updateVehiclePosition(normalizedData.deviceId, {
 							latitude: normalizedData.latitude,
 							longitude: normalizedData.longitude,
